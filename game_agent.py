@@ -178,8 +178,25 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-        if depth == 1:
-            return game.utility(game.active_player) + self.score(game, game.active_player), None
+
+        while depth != 0:
+            depth = depth -1
+            legal_moves = game.get_legal_moves()
+            all_scores = []
+            all_moves = []
+            for move in legal_moves:
+                next_state = game.forecast_move(move)
+                score, best_move = self.minimax(next_state, depth, not maximizing_player)
+                all_scores.append(score)
+                all_moves.append(move)
+            if maximizing_player:
+                return max(all_scores), all_moves[all_scores.index(max(all_scores))]
+            else:
+                return min(all_scores), all_moves[all_scores.index(min(all_scores))]
+            
+        if depth == 0:
+            score = game.utility(self) + self.score(game, self)
+            return score, (-1, -1)
 
         # next_legal_moves = game.get_legal_moves()
         # if len(next_legal_moves) is 0:
