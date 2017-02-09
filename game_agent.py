@@ -180,27 +180,33 @@ class CustomPlayer:
 
 
         while depth != 0:
+            # Go one level deeper, and stop when depth = 0
             depth = depth -1
+            # Get all the next moves to search
             legal_moves = game.get_legal_moves()
             all_scores = []
             all_moves = []
             for move in legal_moves:
+                # Start to search every next move
+                # Apply the move, and pass this state to next level search
                 next_state = game.forecast_move(move)
+                # It is an alternating game between two players, so toggling maximizing_player will do the trick
                 score, best_move = self.minimax(next_state, depth, not maximizing_player)
+                # For this move, we get the score 
                 all_scores.append(score)
                 all_moves.append(move)
+            # After getting the scores of all the moves, then get the max/min score and move, depending on which player is playing
             if maximizing_player:
                 return max(all_scores), all_moves[all_scores.index(max(all_scores))]
             else:
                 return min(all_scores), all_moves[all_scores.index(min(all_scores))]
             
+        # We will not search next level, so evaluate the score of student player
         if depth == 0:
             score = game.utility(self) + self.score(game, self)
+            # As defined by the function, return (-1, -1) for no legal moves because we stop here
             return score, (-1, -1)
-
-        # next_legal_moves = game.get_legal_moves()
-        # if len(next_legal_moves) is 0:
-        #     return self.score()
+            
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the
