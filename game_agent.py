@@ -206,6 +206,64 @@ class CustomPlayer:
             score = game.utility(self) + self.score(game, self)
             # As defined by the function, return (-1, -1) for no legal moves because we stop here
             return score, (-1, -1)
+
+    def alphabeta_max_value(self, game, depth, alpha=float("-inf"), beta=float("inf")):
+        # We will not search next level, so evaluate the score of student player
+        if depth == 0:
+            score = game.utility(self) + self.score(game, self)
+            # As defined by the function, return (-1, -1) for no legal moves because we stop here
+            return score, (-1, -1)
+        score = float("-inf")
+        best_move = (-1, -1)
+        # Go one level deeper, and stop when depth = 0
+        depth = depth -1
+        # Get all the next moves to search
+        legal_moves = game.get_legal_moves()
+        all_scores = []
+        all_moves = []
+        for move in legal_moves:
+            # Start to search every next move
+            # Apply the move, and pass this state to next level search
+            next_state = game.forecast_move(move)
+            min_value, next_level_best_move = self.alphabeta_min_value(game, depth, alpha, beta)
+            print(move)
+            print(min_value)
+            print(score)
+            if min_value > score:
+                score = min_value
+                best_move = move
+            if score >= beta:
+                return score, best_move
+            alpha = max(alpha, score)
+        return score, best_move
+
+
+    def alphabeta_min_value(self, game, depth, alpha=float("-inf"), beta=float("inf")):
+        # We will not search next level, so evaluate the score of student player
+        if depth == 0:
+            score = game.utility(self) + self.score(game, self)
+            # As defined by the function, return (-1, -1) for no legal moves because we stop here
+            return score, (-1, -1)
+        score = float("inf")
+        best_move = (-1, -1)
+        # Go one level deeper, and stop when depth = 0
+        depth = depth -1
+        # Get all the next moves to search
+        legal_moves = game.get_legal_moves()
+        all_scores = []
+        all_moves = []
+        for move in legal_moves:
+            # Start to search every next move
+            # Apply the move, and pass this state to next level search
+            next_state = game.forecast_move(move)
+            max_value, next_level_best_move = self.alphabeta_max_value(game, depth, alpha, beta)
+            if max_value < score:
+                score = max_value
+                best_move = move
+            if score <= alpha:
+                return score, best_move
+            beta = max(beta, score)
+        return score, best_move
             
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
@@ -249,5 +307,10 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        if maximizing_player:
+            return self.alphabeta_max_value(game, depth, alpha, beta)
+        else:
+            return self.alphabeta_min_value(game, depth, alpha, beta)
+
+
+
