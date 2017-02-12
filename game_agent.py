@@ -225,10 +225,7 @@ class CustomPlayer:
             # Start to search every next move
             # Apply the move, and pass this state to next level search
             next_state = game.forecast_move(move)
-            min_value, next_level_best_move = self.alphabeta_min_value(game, depth, alpha, beta)
-            print(move)
-            print(min_value)
-            print(score)
+            min_value, next_level_best_move = self.alphabeta_min_value(next_state, depth, alpha, beta)
             if min_value > score:
                 score = min_value
                 best_move = move
@@ -256,13 +253,13 @@ class CustomPlayer:
             # Start to search every next move
             # Apply the move, and pass this state to next level search
             next_state = game.forecast_move(move)
-            max_value, next_level_best_move = self.alphabeta_max_value(game, depth, alpha, beta)
+            max_value, next_level_best_move = self.alphabeta_max_value(next_state, depth, alpha, beta)
             if max_value < score:
                 score = max_value
                 best_move = move
             if score <= alpha:
                 return score, best_move
-            beta = max(beta, score)
+            beta = min(beta, score)
         return score, best_move
             
 
