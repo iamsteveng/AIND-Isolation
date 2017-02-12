@@ -123,25 +123,36 @@ class CustomPlayer:
         # Perform any required initializations, including selecting an initial
         # move from the game board (i.e., an opening book), or returning
         # immediately if there are no legal moves
+        
+        # Return (-1, -1) if there are no available legal moves
+        if legal_moves is None:
+            return (-1, -1)
 
+        # If not iterative deepening, search with depth = self.search_depth
+        if self.iterative is False:
+            if self.method == 'minimax':
+                return self.minimax(game, self.search_depth)[1]
+            elif self.method == 'alphabeta':
+                return self.alphabeta(game, self.search_depth)[1]
+
+        depth = 0
+        best_move = (-1, -1)
         try:
             # The search method call (alpha beta or minimax) should happen in
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
-            if self.method == 'minimax':
-                all_scores = []
-                all_moves = []
-                for move in legal_moves:
-                    next_state = game.forecast_move(move)
-                    score, _ = self.minimax(next_state, self.search_depth)
-                    all_scores.append(score)
-                    all_moves.append(move)
-                return all_moves[all_scores.index(max(all_scores))]
+            
+            while depth < float("inf"):
+                if self.method == 'minimax':
+                    best_move = self.minimax(game, depth)[1]
+                elif self.method == 'alphabeta':
+                    best_move = self.alphabeta(game, depth)[1]
+                depth = depth + 1
 
         except Timeout:
             # Handle any actions required at timeout, if necessary
-            pass
+            return best_move
 
 
     def minimax(self, game, depth, maximizing_player=True):
@@ -184,6 +195,10 @@ class CustomPlayer:
             depth = depth -1
             # Get all the next moves to search
             legal_moves = game.get_legal_moves()
+            if not legal_moves:
+                score = game.utility(self) + self.score(game, self)
+                # As defined by the function, return (-1, -1) for no legal moves because we stop here
+                return score, (-1, -1)
             all_scores = []
             all_moves = []
             for move in legal_moves:
@@ -219,6 +234,10 @@ class CustomPlayer:
         depth = depth -1
         # Get all the next moves to search
         legal_moves = game.get_legal_moves()
+        if not legal_moves:
+            score = game.utility(self) + self.score(game, self)
+            # As defined by the function, return (-1, -1) for no legal moves because we stop here
+            return score, (-1, -1)
         all_scores = []
         all_moves = []
         for move in legal_moves:
@@ -247,6 +266,10 @@ class CustomPlayer:
         depth = depth -1
         # Get all the next moves to search
         legal_moves = game.get_legal_moves()
+        if not legal_moves:
+            score = game.utility(self) + self.score(game, self)
+            # As defined by the function, return (-1, -1) for no legal moves because we stop here
+            return score, (-1, -1)
         all_scores = []
         all_moves = []
         for move in legal_moves:
