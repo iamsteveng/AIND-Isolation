@@ -124,7 +124,7 @@ class CustomPlayer:
         # immediately if there are no legal moves
         
         # Return (-1, -1) if there are no available legal moves
-        if legal_moves is None:
+        if not legal_moves:
             return (-1, -1)
 
         # If not iterative deepening, search with depth = self.search_depth
