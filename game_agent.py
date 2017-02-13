@@ -36,8 +36,16 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
+    if game.is_loser(player):
+        return float("-inf")
 
-    return float(0.0)
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+    return float(own_moves^2 - opp_moves^2)
 
 
 class CustomPlayer:
@@ -222,6 +230,9 @@ class CustomPlayer:
             return score, (-1, -1)
 
     def alphabeta_max_value(self, game, depth, alpha=float("-inf"), beta=float("inf")):
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise Timeout()
+
         # We will not search next level, so evaluate the score of student player
         if depth == 0:
             score = game.utility(self) + self.score(game, self)
@@ -254,6 +265,9 @@ class CustomPlayer:
 
 
     def alphabeta_min_value(self, game, depth, alpha=float("-inf"), beta=float("inf")):
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise Timeout()
+
         # We will not search next level, so evaluate the score of student player
         if depth == 0:
             score = game.utility(self) + self.score(game, self)
