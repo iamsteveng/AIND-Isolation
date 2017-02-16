@@ -44,9 +44,31 @@ def custom_score(game, player):
 
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(1/(opp_moves+1)+own_moves)
 
+
+def custom_score_1(game, player):
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
     return float(own_moves^2 - opp_moves^2)
 
+
+def custom_score_2(game, player):
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(1/(opp_moves+1)*own_moves)
 
 class CustomPlayer:
     """Game-playing agent that chooses a move using your evaluation function
@@ -135,16 +157,18 @@ class CustomPlayer:
         if not legal_moves:
             return (-1, -1)
 
-        # If not iterative deepening, search with depth = self.search_depth
-        if self.iterative is False:
-            if self.method == 'minimax':
-                return self.minimax(game, self.search_depth)[1]
-            elif self.method == 'alphabeta':
-                return self.alphabeta(game, self.search_depth)[1]
+       
 
         depth = 0
         best_move = (-1, -1)
         try:
+             # If not iterative deepening, search with depth = self.search_depth
+            if self.iterative is False:
+                if self.method == 'minimax':
+                    return self.minimax(game, self.search_depth)[1]
+                elif self.method == 'alphabeta':
+                    return self.alphabeta(game, self.search_depth)[1]
+
             # The search method call (alpha beta or minimax) should happen in
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
@@ -213,7 +237,11 @@ class CustomPlayer:
                 # Apply the move, and pass this state to next level search
                 next_state = game.forecast_move(move)
                 # It is an alternating game between two players, so toggling maximizing_player will do the trick
-                score, best_move = self.minimax(next_state, depth, not maximizing_player)
+                try:
+                    score, best_move = self.minimax(next_state, depth, not maximizing_player)
+                except Timeout:
+                    raise Timeout()
+                
                 # For this move, we get the score 
                 all_scores.append(score)
                 all_moves.append(move)
@@ -254,7 +282,11 @@ class CustomPlayer:
             # Start to search every next move
             # Apply the move, and pass this state to next level search
             next_state = game.forecast_move(move)
-            min_value, next_level_best_move = self.alphabeta_min_value(next_state, depth, alpha, beta)
+            try:
+                min_value, next_level_best_move = self.alphabeta_min_value(next_state, depth, alpha, beta)
+            except Timeout:
+                raise Timeout()
+            
             if min_value > score:
                 score = min_value
                 best_move = move
@@ -289,7 +321,11 @@ class CustomPlayer:
             # Start to search every next move
             # Apply the move, and pass this state to next level search
             next_state = game.forecast_move(move)
-            max_value, next_level_best_move = self.alphabeta_max_value(next_state, depth, alpha, beta)
+            try:
+                max_value, next_level_best_move = self.alphabeta_max_value(next_state, depth, alpha, beta)
+            except Timeout:
+                raise Timeout()
+            
             if max_value < score:
                 score = max_value
                 best_move = move
@@ -340,10 +376,15 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-        if maximizing_player:
-            return self.alphabeta_max_value(game, depth, alpha, beta)
-        else:
-            return self.alphabeta_min_value(game, depth, alpha, beta)
+        try:
+            if maximizing_player:
+                return self.alphabeta_max_value(game, depth, alpha, beta)
+            else:
+                return self.alphabeta_min_value(game, depth, alpha, beta)
+        except Timeout:
+            raise Timeout()
+
+        
 
 
 
